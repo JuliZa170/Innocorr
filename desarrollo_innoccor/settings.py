@@ -42,12 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'usuarios',
 ]
 
 MIDDLEWARE = [
     'desarrollo_innoccor.custom_middleware.JSONResponseMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -140,3 +142,7 @@ EMAIL_HOST_USER = 'juliancho_170799@hotmail.com'
 EMAIL_HOST_PASSWORD = 'estefani'
 EMAIL_USE_TLS = True  # O False si no se utiliza TLS
 DEFAULT_FROM_EMAIL = 'juliancho_170799@hotmail.com'
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',  # Agrega aquí la URL desde la que haces la solicitud
+]
