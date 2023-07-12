@@ -28,6 +28,7 @@ import random
 import string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
+from django.middleware import csrf
 
 
 User = get_user_model()
@@ -134,13 +135,19 @@ class CustomUserCreateView(CreateView):
 class CustomUserCreateView(CreateView):
     def post(self, request):
         try:
+            csrf_token = csrf.get_token(request)
            # raise Exception("¡Ha ocurrido un error!")
             if request.method == 'POST':
                 # Analiza los datos JSON enviados en la solicitud
                 try:
                     data = json.loads(request.body)
                 except json.JSONDecodeError:
-                    return JsonResponse({'error': 'Datos JSON no válidos'}, status=400)
+                    response_data = {
+                        'csrf_token': csrf_token,
+                        'error': 'Datos JSON no válidos',
+                        # Otros datos que desees incluir en la respuesta JSON
+                    }
+                    return JsonResponse(response_data,status=400)
 
                 # Crea una instancia del formulario con los datos recibidos
                 form = CustomUserCreationForm(data)
@@ -148,7 +155,12 @@ class CustomUserCreateView(CreateView):
                 # Realiza la validación del formulario
                 if not form.is_valid():
                     # Devuelve una respuesta de error con los errores del formulario
-                    return JsonResponse({'error': form.errors}, status=400)
+                    response_data = {
+                        'csrf_token': csrf_token,
+                        'error': form.errors,
+                        # Otros datos que desees incluir en la respuesta JSON
+                    }
+                    return JsonResponse(response_data, status=400)
 
                 # Los datos son válidos, continúa con la lógica de registro del usuario
                 first_name= data.get('first_name')
@@ -161,21 +173,39 @@ class CustomUserCreateView(CreateView):
                 
                 # Validar los datos ingresados
                 if not username or not password1 or not email or not password2:
-                    return JsonResponse({'message': 'Username, password, and email are required.'}, status=400)
+                    response_data = {
+                        'csrf_token': csrf_token,
+                        'message': 'Username, password, and email are required.'
+                        # Otros datos que desees incluir en la respuesta JSON
+                    }
+                    return JsonResponse(response_data, status=400)
 
                 # Crear el nuevo usuario
                 try:
                     user = User.objects.create_user(username=username, password=password1, email=email, first_name=first_name, last_name=last_name)
                 except Exception as e:
-                    return JsonResponse({'message': str(e)}, status=400)
-
+                    response_data = {
+                        'csrf_token': csrf_token,
+                        'message': str(e)
+                        # Otros datos que desees incluir en la respuesta JSON
+                    }
+                    return JsonResponse(response_data, status=400)
+                response_data = {
+                        'csrf_token': csrf_token,
+                        'message': 'User registered successfully.'
+                        # Otros datos que desees incluir en la respuesta JSON
+                }
                 return JsonResponse({'message': 'User registered successfully.'}, status=201)
         except Exception as e:
+                    response_data = {
+                        'csrf_token': csrf_token,
+                        'error': str(e)
+                        # Otros datos que desees incluir en la respuesta JSON
+                    }
                     # Si ocurre un error, devuelves una respuesta JSON con el mensaje de error
-                    error = {'error': str(e)}
-                    return JsonResponse(error, status=500)   
+                    
+                    return JsonResponse(response_data, status=500)   
     form_class = CustomUserCreationForm  # El formulario personalizado para el registro de usuarios
-    template_name = 'usuarios/registro.html'  # La plantilla para el formulario de registro
 
 class UserDetailView(LoginRequiredMixin,View):
     def get(self, request, username):
