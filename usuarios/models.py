@@ -6,3 +6,4 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     # Agrega campos adicionales aquí si es necesario
     role = models.CharField(max_length=55, default='Asesor')
+    verification_code=models.CharField(max_length=55, default='')
