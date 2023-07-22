@@ -46,10 +46,18 @@ INSTALLED_APPS = [
     'usuarios',
 ]
 
+# Restringir los formatos de respuesta a JSON para el caso de errores
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
 MIDDLEWARE = [
     'desarrollo_innoccor.custom_middleware.JSONResponseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

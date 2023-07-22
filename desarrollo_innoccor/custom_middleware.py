@@ -1,3 +1,6 @@
+# middleware.py
+
+import json
 from django.http import JsonResponse
 
 class JSONResponseMiddleware:
@@ -6,9 +9,18 @@ class JSONResponseMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
+
+        if response.status_code >= 400:
+            # Si la respuesta tiene un código de estado de error (400 o más),
+            # generamos una respuesta JSON personalizada con el mensaje de error.
+            response = JsonResponse(
+                {
+                    'error': {
+                        'status_code': response.status_code,
+                        'message': response.reason_phrase,
+                    }
+                },
+                status=response.status_code
+            )
+
         return response
-    def process_exception(self, request, exception):
-        # Manejar excepciones y devolver una respuesta JSON adecuada
-        error_message = str(exception)
-        response_data = {'error': error_message}
-        return JsonResponse(response_data, status=500)
